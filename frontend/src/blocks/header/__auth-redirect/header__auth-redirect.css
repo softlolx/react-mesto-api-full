@@ -1,0 +1,13 @@
+.header__auth-redirect {
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 22px;
+
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.header__auth-redirect:hover {
+  opacity: 0.8;
+  cursor: pointer;
+}

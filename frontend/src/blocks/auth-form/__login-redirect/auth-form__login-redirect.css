@@ -1,0 +1,13 @@
+.auth-form__login-redirect {
+  text-decoration: none;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 17px;
+
+  color: #ffffff;
+}
+
+.auth-form__login-redirect:hover {
+  opacity: 0.8;
+  cursor: pointer;
+}
