@@ -46,7 +46,6 @@ function App() {
 
   async function tokenCheck() {
     const token = await localStorage.getItem("token");
-    console.log(token);
     if (token) {
       try {
         const res = await auth.getContent(token);
