@@ -1,25 +1,25 @@
-import { api } from "../utils/Api";
-import * as auth from "../utils/Auth";
-import { Header } from "./Header";
-import { Footer } from "./Footer";
-import { Main } from "./Main";
-import { Login } from "./Login";
-import { Register } from "./Register";
-import { Popup } from "./Popup";
-import { EditProfilePopup } from "./EditProfilePopup";
-import { EditAvatarPopup } from "./EditAvatarPopup";
-import { AddPlacePopup } from "./AddPlacePopup";
-import { ImagePopup } from "./ImagePopup";
-import { InfoTooltip } from "./InfoTooltip";
-import { useState, useEffect } from "react";
-import { Route, Switch, useHistory } from "react-router-dom";
-import { ProtectedRoute } from "./ProtectedRoute";
+import { api } from '../utils/Api';
+import * as auth from '../utils/Auth';
+import { Header } from './Header';
+import { Footer } from './Footer';
+import { Main } from './Main';
+import { Login } from './Login';
+import { Register } from './Register';
+import { Popup } from './Popup';
+import { EditProfilePopup } from './EditProfilePopup';
+import { EditAvatarPopup } from './EditAvatarPopup';
+import { AddPlacePopup } from './AddPlacePopup';
+import { ImagePopup } from './ImagePopup';
+import { InfoTooltip } from './InfoTooltip';
+import { useState, useEffect } from 'react';
+import { Route, Switch, useHistory } from 'react-router-dom';
+import { ProtectedRoute } from './ProtectedRoute';
 
-import { CurrentUserContext } from "../contexts/CurrentUserContext";
+import { CurrentUserContext } from '../contexts/CurrentUserContext';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
+  const [userEmail, setUserEmail] = useState('');
   const history = useHistory();
   const [currentUser, setCurrentUser] = useState({});
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
@@ -32,43 +32,38 @@ function App() {
   const [isPendingResponse, setIsPendingResponse] = useState(false);
 
   useEffect(() => {
+    tokenCheck();
+  }, []);
+
+  useEffect(() => {
     Promise.all([api.getUserInfo(), api.getInitialCards()])
       .then(([userData, initialCards]) => {
         setCurrentUser(userData);
         setCards(initialCards);
       })
       .catch((e) => console.log(e));
-  }, []);
-
-  useEffect(() => {
-    tokenCheck();
-  }, []);
+  }, [isLoggedIn]);
 
   async function tokenCheck() {
-    const token = await localStorage.getItem("token");
-    if (token) {
-      try {
-        const res = await auth.getContent(token);
-        if (res.data) {
-          setIsLoggedIn(true);
-          setUserEmail(res.data.email);
-          history.push("/");
-        }
-      } catch (err) {
-        setIsLoggedIn(false);
-        history.push("/signin");
+    try {
+      const res = await auth.getContent();
+      if (res.email) {
+        setIsLoggedIn(true);
+        setUserEmail(res.email);
+        history.push('/');
       }
+    } catch (err) {
+      setIsLoggedIn(false);
+      history.push('/signin');
     }
   }
 
-  async function handleRegister(email, password) {
+  function handleRegister(email, password) {
     auth
       .register(email, password)
       .then((res) => {
-        setUserEmail(res.data.email);
-        setIsLoggedIn(true);
-        history.push("/");
-        setIsInfoTooltipOpened(true);
+        setUserEmail(res.email);
+        history.push('/');
       })
       .catch((error) => {
         setIsInfoTooltipOpened(true);
@@ -80,10 +75,10 @@ function App() {
     auth
       .login(email, password)
       .then((res) => {
-        localStorage.setItem("token", res.token);
-        setUserEmail(email);
+        console.log(res);
+        setUserEmail(res.email);
         setIsLoggedIn(true);
-        history.push("/");
+        history.push('/');
       })
       .catch((error) => {
         setIsInfoTooltipOpened(true);
@@ -92,14 +87,20 @@ function App() {
   }
 
   function handleSignOut() {
-    localStorage.removeItem("token");
-    history.push("/signin");
-    setIsLoggedIn(false);
-    setUserEmail("");
+    auth
+      .logout()
+      .then(() => {
+        history.push('/signin');
+        setIsLoggedIn(false);
+        setUserEmail('');
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
   async function handleCardLike(card) {
-    const isLiked = card.likes.some((item) => item._id === currentUser._id);
+    const isLiked = card.likes.some((item) => item === currentUser._id);
 
     if (!isLiked) {
       try {
@@ -193,19 +194,29 @@ function App() {
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
-      <div className="page">
-        <Header isLoggedIn={isLoggedIn} userEmail={userEmail} onSignOut={handleSignOut} />
-        <main className="content">
+      <div className='page'>
+        <Header
+          isLoggedIn={isLoggedIn}
+          userEmail={userEmail}
+          onSignOut={handleSignOut}
+        />
+        <main className='content'>
           <Switch>
-            <Route path="/signin">
-              <Login isPending={isPendingResponse} onLogIn={handleLogIn} />
+            <Route path='/signin'>
+              <Login
+                isPending={isPendingResponse}
+                onLogIn={handleLogIn}
+              />
             </Route>
-            <Route path="/signup">
-              <Register isPending={isPendingResponse} onRegister={handleRegister} />
+            <Route path='/signup'>
+              <Register
+                isPending={isPendingResponse}
+                onRegister={handleRegister}
+              />
             </Route>
             <ProtectedRoute
               exact
-              path="/"
+              path='/'
               isLoggedIn={isLoggedIn}
               onEditProfile={handleEditProfileClick}
               onAddPlace={handleAddPlaceClick}
@@ -241,11 +252,22 @@ function App() {
           isOpen={isEditAvatarPopupOpen}
         />
 
-        <Popup name="image" isOpen={isImagePopupOpen} onClose={closeAllPopups}>
-          <ImagePopup isOpen={isImagePopupOpen} onClose={closeAllPopups} card={selectedCard} />
+        <Popup
+          name='image'
+          isOpen={isImagePopupOpen}
+          onClose={closeAllPopups}
+        >
+          <ImagePopup
+            isOpen={isImagePopupOpen}
+            onClose={closeAllPopups}
+            card={selectedCard}
+          />
         </Popup>
 
-        <Popup isOpen={isInfoTooltipOpened} onClose={closeAllPopups}>
+        <Popup
+          isOpen={isInfoTooltipOpened}
+          onClose={closeAllPopups}
+        >
           <InfoTooltip
             isOpen={isInfoTooltipOpened}
             onClose={closeAllPopups}

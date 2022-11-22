@@ -19,23 +19,36 @@ export function register(email, password) {
   }).then(handleResponse);
 }
 
-export function login(email, password) {
-  return fetch(`${BASE_URL}/signin`, {
+export async function login(email, password) {
+  const res = await fetch(`${BASE_URL}/signin`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     credentials: 'include',
     body: JSON.stringify({ email, password }),
-  }).then(handleResponse);
+  });
+  return handleResponse(res);
 }
 
-export function getContent(token) {
-  return fetch(`${BASE_URL}/users/me`, {
+export async function logout() {
+  const res = await fetch(`${BASE_URL}/signout`, {
+    method: 'GET',
+    credentials: 'include',
+  });
+  if (res.ok) {
+    return await res.json();
+  }
+  return handleResponse(res);
+}
+
+export async function getContent() {
+  const res = await fetch(`${BASE_URL}/users/me`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
     credentials: 'include',
-  }).then(handleResponse);
+  });
+  return handleResponse(res);
 }

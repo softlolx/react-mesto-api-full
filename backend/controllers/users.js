@@ -38,6 +38,10 @@ module.exports.login = (req, res, next) => {
     });
 };
 
+// module.exports.logout = (_, res) => {
+//   res.clearCookie('token').send({ message: 'Вы вышли разлогинились' });
+// };
+
 module.exports.getMyProfile = (req, res, next) => {
   User.findOne({ _id: req.user._id })
     .then((user) => res.send(user))
@@ -75,6 +79,7 @@ module.exports.createUser = async (req, res, next) => {
     about,
     avatar,
     email,
+    _id,
     password,
   } = req.body;
   try {
@@ -84,6 +89,7 @@ module.exports.createUser = async (req, res, next) => {
       about,
       avatar,
       email,
+      _id,
       password: passwordHash,
     });
     res.status(201).send(user);
