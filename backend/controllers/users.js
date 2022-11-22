@@ -7,15 +7,27 @@ const NotFoundError = require('../utils/errors/notFoundError');
 const UsedEmailError = require('../utils/errors/usedEmailError');
 const { JWT_SECRET } = require('../utils/constants');
 
+const createTokenById = (id) => {
+  return jwt.sign({ _id: id }, JWT_SECRET, { expiresIn: '7d' });
+};
+
+const sendCookie = (res, { _id: id, email }) => {
+  const token = createTokenById(id);
+  return res
+    .cookie('token', token, {
+      maxAge: 604800000,
+      httpOnly: true,
+      sameSite: true,
+    })
+    .send({ email });
+};
+
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUser(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
-      res
-        .cookie('token', token, { maxAge: 3600 * 24 * 7, httpOnly: true, sameSite: true })
-        .send({ email });
+      sendCookie(res, user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {

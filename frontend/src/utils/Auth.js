@@ -1,4 +1,4 @@
-const BASE_URL = "https://auth.nomoreparties.co";
+const BASE_URL = 'https://api.mesto-softlolx.nomoredomains.club';
 
 function handleResponse(res) {
   if (res.ok) {
@@ -10,30 +10,32 @@ function handleResponse(res) {
 
 export function register(email, password) {
   return fetch(`${BASE_URL}/signup`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
+    credentials: 'include',
     body: JSON.stringify({ email, password }),
   }).then(handleResponse);
 }
 
 export function login(email, password) {
   return fetch(`${BASE_URL}/signin`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
+    credentials: 'include',
     body: JSON.stringify({ email, password }),
   }).then(handleResponse);
 }
 
 export function getContent(token) {
   return fetch(`${BASE_URL}/users/me`, {
-    method: "GET",
+    method: 'GET',
     headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
     },
+    credentials: 'include',
   }).then(handleResponse);
 }
