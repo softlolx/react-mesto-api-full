@@ -5,10 +5,11 @@ const User = require('../models/user');
 const BadRequestError = require('../utils/errors/badRequestError');
 const NotFoundError = require('../utils/errors/notFoundError');
 const UsedEmailError = require('../utils/errors/usedEmailError');
-const { JWT_SECRET } = require('../utils/constants');
+const { getJWT } = require('../utils/utils');
 
 const createTokenById = (id) => {
-  return jwt.sign({ _id: id }, JWT_SECRET, { expiresIn: '7d' });
+  const secretKey = getJWT();
+  return jwt.sign({ _id: id }, secretKey, { expiresIn: '7d' });
 };
 
 const sendCookie = (res, { _id: id, email }) => {
@@ -38,9 +39,9 @@ module.exports.login = (req, res, next) => {
     });
 };
 
-// module.exports.logout = (_, res) => {
-//   res.clearCookie('token').send({ message: 'Вы вышли разлогинились' });
-// };
+module.exports.logout = (_, res) => {
+  res.clearCookie('token').send({ message: 'Вы вышли разлогинились' });
+};
 
 module.exports.getMyProfile = (req, res, next) => {
   User.findOne({ _id: req.user._id })
